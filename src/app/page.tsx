@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { dictionaries, type Dictionary } from "../dictionaries";
 
 type ThemeOption = "auto" | "light" | "dark";
+type Language = "en" | "zh";
 type Unit = "px" | "rem" | "pt";
 type RowState = "enter" | "idle" | "exit";
 
@@ -83,12 +85,6 @@ const recalcRow = (
   return row;
 };
 
-const THEME_LABELS: Record<ThemeOption, string> = {
-  auto: "Auto",
-  light: "Light",
-  dark: "Dark"
-};
-
 const THEME_ICONS: Record<ThemeOption, string> = {
   auto: "bi-circle-half",
   light: "bi-sun",
@@ -99,12 +95,14 @@ const UnitField = ({
   unit,
   label,
   value,
-  onChange
+  onChange,
+  dict
 }: {
   unit: Unit;
   label: string;
   value: string;
   onChange: (value: string) => void;
+  dict: Dictionary;
 }) => {
   const abbreviation = unit.toUpperCase();
   return (
@@ -114,7 +112,7 @@ const UnitField = ({
           <span className={`unit-chip ${unit}`}>{abbreviation}</span>
           <span className="fw-semibold">{label}</span>
         </div>
-        <label className="form-label text-secondary">Enter {label.toLowerCase()}</label>
+        <label className="form-label text-secondary">{dict.enter} {label.toLowerCase()}</label>
         <div className="input-group">
           <input
             className="form-control form-control-lg"
@@ -133,32 +131,39 @@ const UnitField = ({
 
 const ThemeToggle = ({
   theme,
-  onChange
+  onChange,
+  dict
 }: {
   theme: ThemeOption;
   onChange: (theme: ThemeOption) => void;
+  dict: Dictionary;
 }) => {
+  const themeLabels: Record<ThemeOption, string> = {
+    auto: dict.themeAuto,
+    light: dict.themeLight,
+    dark: dict.themeDark
+  };
+
   return (
     <div className="theme-toggle d-flex align-items-center gap-3 flex-wrap">
       <span className="text-secondary fw-semibold small text-uppercase letter-spacing-1">
-        Theme
+        {dict.theme}
       </span>
       <div
         className="d-flex gap-2"
         role="group"
         aria-label="Switch theme between auto, light, and dark"
       >
-        {(Object.keys(THEME_LABELS) as ThemeOption[]).map((option) => (
+        {(Object.keys(themeLabels) as ThemeOption[]).map((option) => (
           <button
             key={option}
             type="button"
-            className={`btn btn-sm d-inline-flex align-items-center gap-2 ${
-              option === theme ? "btn-primary" : "btn-outline-secondary"
-            }`}
+            className={`btn btn-sm d-inline-flex align-items-center gap-2 ${option === theme ? "btn-primary" : "btn-outline-secondary"
+              }`}
             onClick={() => onChange(option)}
           >
             <i className={`bi ${THEME_ICONS[option]}`} aria-hidden />
-            <span>{THEME_LABELS[option]}</span>
+            <span>{themeLabels[option]}</span>
           </button>
         ))}
       </div>
@@ -166,10 +171,56 @@ const ThemeToggle = ({
   );
 };
 
+const LanguageToggle = ({
+  language,
+  onChange,
+  dict
+}: {
+  language: Language;
+  onChange: (lang: Language) => void;
+  dict: Dictionary;
+}) => {
+  return (
+    <div className="language-toggle d-flex align-items-center gap-3 flex-wrap">
+      <span className="text-secondary fw-semibold small text-uppercase letter-spacing-1">
+        {dict.language}
+      </span>
+      <div className="d-flex gap-2" role="group">
+        <button
+          type="button"
+          className={`btn btn-sm d-inline-flex align-items-center gap-2 ${language === "en" ? "btn-primary" : "btn-outline-secondary"
+            }`}
+          onClick={() => onChange("en")}
+        >
+          <span>English</span>
+        </button>
+        <button
+          type="button"
+          className={`btn btn-sm d-inline-flex align-items-center gap-2 ${language === "zh" ? "btn-primary" : "btn-outline-secondary"
+            }`}
+          onClick={() => onChange("zh")}
+        >
+          <span>中文</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [theme, setTheme] = useState<ThemeOption>("auto");
+  const [language, setLanguage] = useState<Language>("en");
   const [remInPx, setRemInPx] = useState(DEFAULTS.remInPx.toString());
   const [pxInPt, setPxInPt] = useState(DEFAULTS.pxInPt.toString());
+
+  const dict = dictionaries[language];
+
+  useEffect(() => {
+    const systemLang = navigator.language.toLowerCase();
+    if (systemLang.startsWith("zh")) {
+      setLanguage("zh");
+    }
+  }, []);
 
   const pxPerRem = useMemo(() => {
     const parsed = parseFloat(remInPx);
@@ -306,33 +357,33 @@ export default function Home() {
       <div className="container-xl">
         <section className="hero-card glass-surface p-4 p-md-5 text-center mb-4 bg-body">
           <p className="text-primary fw-semibold text-uppercase small mb-2 tracking-wide">
-            Text Size Converter
+            {dict.title}
           </p>
-          <h1 className="display-5 fw-bold mb-3">Design-friendly conversions</h1>
+          <h1 className="display-5 fw-bold mb-3">{dict.heroTitle}</h1>
           <p className="lead text-secondary mb-0">
-            Convert pixels, rem, and points instantly. Configure multiple rows to
-            compare styles and update the base reference that powers the
-            calculations.
+            {dict.heroDescription}
           </p>
         </section>
 
         <section className="glass-surface bg-body p-4 p-md-5 shadow-sm mb-4">
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
             <div>
-              <h2 className="h4 fw-bold mb-1">Conversion Calculator</h2>
+              <h2 className="h4 fw-bold mb-1">{dict.conversionTitle}</h2>
               <p className="mb-0 text-secondary">
-                Enter a value in any unit to update the rest automatically.
+                {dict.conversionDescription}
               </p>
             </div>
-            <ThemeToggle theme={theme} onChange={setTheme} />
+            <div className="d-flex flex-column gap-3 align-items-end">
+              <ThemeToggle theme={theme} onChange={setTheme} dict={dict} />
+              <LanguageToggle language={language} onChange={setLanguage} dict={dict} />
+            </div>
           </div>
 
           {rows.map((row) => (
             <div
               key={row.id}
-              className={`conversion-row mb-4 ${
-                row.state === "enter" ? "row-enter" : row.state === "exit" ? "row-exit" : ""
-              }`}
+              className={`conversion-row mb-4 ${row.state === "enter" ? "row-enter" : row.state === "exit" ? "row-exit" : ""
+                }`}
             >
               <button
                 type="button"
@@ -346,21 +397,24 @@ export default function Home() {
               <div className="row g-4">
                 <UnitField
                   unit="px"
-                  label="Pixels"
+                  label={dict.pixels}
                   value={row.px}
                   onChange={(value) => handleUnitChange(row.id, "px", value)}
+                  dict={dict}
                 />
                 <UnitField
                   unit="rem"
-                  label="Root Em"
+                  label={dict.rootEm}
                   value={row.rem}
                   onChange={(value) => handleUnitChange(row.id, "rem", value)}
+                  dict={dict}
                 />
                 <UnitField
                   unit="pt"
-                  label="Points"
+                  label={dict.points}
                   value={row.pt}
                   onChange={(value) => handleUnitChange(row.id, "pt", value)}
+                  dict={dict}
                 />
               </div>
             </div>
@@ -371,16 +425,16 @@ export default function Home() {
             className="add-row-dashed w-100 fw-semibold"
             onClick={addRow}
           >
-            + Add Conversion Row
+            {dict.addRow}
           </button>
         </section>
 
         <section className="reference-card p-4 p-md-5">
           <div className="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
             <div>
-              <h3 className="h5 fw-bold mb-1">Conversion Reference</h3>
+              <h3 className="h5 fw-bold mb-1">{dict.referenceTitle}</h3>
               <p className="mb-0 text-secondary">
-                Adjust the root values to match your project guidelines.
+                {dict.referenceDescription}
               </p>
             </div>
             <button
@@ -388,14 +442,14 @@ export default function Home() {
               className="btn btn-outline-secondary btn-sm fw-semibold"
               onClick={resetReferences}
             >
-              Reset to Default
+              {dict.resetDefault}
             </button>
           </div>
 
           <div className="row g-4">
             <div className="col-12 col-md-6">
               <label className="form-label fw-semibold text-secondary mb-2">
-                1 rem equals (in px)
+                {dict.remEquals}
               </label>
               <div className="input-group">
                 <input
@@ -410,7 +464,7 @@ export default function Home() {
             </div>
             <div className="col-12 col-md-6">
               <label className="form-label fw-semibold text-secondary mb-2">
-                1 px equals (in pt)
+                {dict.pxEquals}
               </label>
               <div className="input-group">
                 <input
@@ -425,7 +479,7 @@ export default function Home() {
             </div>
           </div>
           <div className="calculated-pill mt-4 text-primary">
-            Calculated: {calculatedSummary}
+            {dict.calculated}: {calculatedSummary}
           </div>
         </section>
       </div>
