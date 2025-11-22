@@ -1,3 +1,5 @@
+![Website Screenshot](\img\screencapture.png)
+
 # Text Size Converter 📏
 
 [English](#english) | [中文](#中文) | [Русский](#русский) | [한국어](#한국어) | [Français](#français) | [Deutsch](#deutsch) | [العربية](#العربية) | [Español](#español)
