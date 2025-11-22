@@ -1,0 +1,28 @@
+{
+  "name": "textsize-converter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "bootstrap": "5.3.3",
+    "bootstrap-icons": "1.11.3",
+    "next": "16.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.12.12",
+    "@types/react": "18.3.3",
+    "eslint": "9.9.0",
+    "eslint-config-next": "16.0.0",
+    "typescript": "5.6.2"
+  },
+  "engines": {
+    "node": ">=25.0.0"
+  }
+}
