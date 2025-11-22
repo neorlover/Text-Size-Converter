@@ -1,4 +1,4 @@
-![Website Screenshot](\img\screencapture.png)
+![Website Screenshot](./img/screencapture.png)
 
 # Text Size Converter 📏
 
